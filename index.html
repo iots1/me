@@ -117,6 +117,20 @@
   <body
     class="min-h-screen p-2 sm:p-6 md:p-10 flex justify-center items-center overflow-hidden"
   >
+    <!-- System Boot / Loading Screen Overlay -->
+    <div
+      id="loading-screen"
+      class="fixed inset-0 z-[100] bg-black text-[#c9d1d9] font-mono p-4 sm:p-8 overflow-hidden text-xs sm:text-sm transition-opacity duration-500 flex flex-col justify-start"
+    >
+      <div id="boot-logs" class="space-y-1"></div>
+      <div>
+        <span
+          id="loading-cursor"
+          class="cursor-blink bg-[#c9d1d9] w-2 h-4 inline-block align-middle mt-1 hidden"
+        ></span>
+      </div>
+    </div>
+
     <!-- Matrix Canvas Overlay (Hidden by default) -->
     <canvas id="matrix-canvas"></canvas>
 
@@ -200,9 +214,11 @@
 
         <!-- End Prompt (Interactive) -->
         <div class="pt-4 pb-10 flex items-center" id="cli-input-line">
-          <span class="cmd-prompt">guest@system</span>:<span class="cmd-dir"
-            >~/portfolio</span
-          >$
+          <span id="cli-prompt-text"
+            ><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir"
+              >~/portfolio</span
+            >$
+          </span>
           <input
             type="text"
             id="cli-input"
@@ -274,7 +290,7 @@
         });
 
       // --- Refactored Content Templates ---
-      // เก็บ HTML ของแต่ละคำสั่งไว้เป็นฟังก์ชัน เพื่อให้เรียกใช้ซ้ำได้แบบเป๊ะๆ 100%
+      // Store HTML for each command as a function for 100% reusable exact output
       const templates = {
         whoami: () => `
                 <div class="mt-4 pl-4 border-l-2 border-[#30363d]">
@@ -395,7 +411,7 @@
             `,
       };
 
-      // ฟังก์ชันสร้าง Content ชุดใหญ่สำหรับ ./deploy_profile.sh
+      // Function to generate the massive content block for ./deploy_profile.sh
       function getDeployProfileContent() {
         return `
                 <div class="space-y-8">
@@ -427,7 +443,83 @@
             `;
       }
 
-      // --- Boot Sequence & Typing Effect ---
+      // --- SYSTEM BOOT / LOADING SCREEN SIMULATION ---
+      const bootMessages = [
+        "BIOS Date 03/22/26 12:16:00 Ver 08.00.15",
+        "CPU: Intel(R) Core(TM) i9 CPU @ 3.50GHz",
+        "Memory Testing : 65536K OK",
+        " ",
+        "Initializing USB Controllers .. Done.",
+        "Press DEL to run Setup",
+        " ",
+        "Booting from Hard Disk...",
+        "Loading Linux Kernel 6.x-generic...",
+        "Loading initial ramdisk...",
+        "[ <span class='text-[#7ee787]'>OK</span> ] Started System Initialization.",
+        "[ <span class='text-[#7ee787]'>OK</span> ] Reached target Local File Systems.",
+        "[ <span class='text-[#7ee787]'>OK</span> ] Started System Logging Service.",
+        "[ <span class='text-[#7ee787]'>OK</span> ] Started D-Bus System Message Bus.",
+        "[ <span class='text-[#7ee787]'>OK</span> ] Started Login Service.",
+        "[ <span class='text-[#7ee787]'>OK</span> ] Started Network Manager.",
+        "[ <span class='text-[#7ee787]'>OK</span> ] Started Docker Application Container Engine.",
+        "[ <span class='text-[#7ee787]'>OK</span> ] Reached target Basic System.",
+        "Mounting /portfolio/academic_archive...",
+        "Starting User Environment...",
+        "Starting Graphical Interface...",
+        "Welcome to JIRAYU-OS.",
+      ];
+
+      function simulateBootProcess() {
+        const logsContainer = document.getElementById("boot-logs");
+        const loadingScreen = document.getElementById("loading-screen");
+        const loadingCursor = document.getElementById("loading-cursor");
+        let msgIndex = 0;
+
+        function printNextBootMessage() {
+          if (msgIndex < bootMessages.length) {
+            const msgDiv = document.createElement("div");
+            msgDiv.innerHTML = bootMessages[msgIndex];
+            logsContainer.appendChild(msgDiv);
+
+            // Auto scroll down during boot
+            loadingScreen.scrollTop = loadingScreen.scrollHeight;
+
+            // Add realistic delay for boot process
+            let delay = Math.random() * 120 + 80; // Random between 80ms and 200ms
+
+            // Make specific steps slower to simulate actual data loading
+            if (msgIndex > 0) {
+              const prevMsg = bootMessages[msgIndex - 1];
+              if (prevMsg.includes("Loading Linux Kernel")) delay = 600;
+              else if (prevMsg.includes("Mounting")) delay = 800;
+              else if (prevMsg.includes("Starting Graphical Interface"))
+                delay = 500;
+            }
+
+            msgIndex++;
+            setTimeout(printNextBootMessage, delay);
+          } else {
+            // Finished loading messages, show cursor briefly, then fade out
+            loadingCursor.classList.remove("hidden");
+
+            setTimeout(() => {
+              loadingScreen.classList.add("opacity-0"); // Tailwind fade out
+
+              // Wait for fade out to complete before removing from flow
+              setTimeout(() => {
+                loadingScreen.style.display = "none";
+                // START MAIN TERMINAL TYPING EFFECT
+                setTimeout(typeWriter, 300);
+              }, 500);
+            }, 800);
+          }
+        }
+
+        // Start booting
+        setTimeout(printNextBootMessage, 200);
+      }
+
+      // --- Boot Sequence & Typing Effect (Main Terminal) ---
       const scriptText = "./deploy_profile.sh";
       const typingElement = document.getElementById("typing-text");
       const cliOutputContainer = document.getElementById(
@@ -438,6 +530,7 @@
       let charIndex = 0;
       let isBootPaused = false;
       let isBootFinished = false;
+      let awaitingConfirmation = null; // Variable to track awaiting yes/no confirmation state
 
       function typeWriter() {
         if (isBootFinished) return;
@@ -482,21 +575,28 @@
         const initialCursor = document.getElementById("initial-cursor");
         if (initialCursor) initialCursor.style.display = "none";
 
-        // Wait a moment then dynamically append the full profile
+        // Instead of showing the profile immediately, switch to y/n prompt mode
         setTimeout(() => {
-          const initDiv = document.createElement("div");
-          initDiv.innerHTML = getDeployProfileContent();
-          cliOutputContainer.appendChild(initDiv);
+          const outputDiv = document.createElement("div");
+          outputDiv.className = "mt-2 mb-2 pl-4 text-[#f2cc60]";
+          outputDiv.innerHTML = `> Warning: This command will display the entire profile content. Proceed?`;
+          cliOutputContainer.appendChild(outputDiv);
 
-          // Scroll to bottom
+          awaitingConfirmation = "deploy_profile";
+          const promptText = document.getElementById("cli-prompt-text");
+          if (promptText)
+            promptText.innerHTML = `<span class="text-[#f2cc60]">(y/n): </span>`;
+
+          // Scroll to bottom and focus
           document.getElementById("terminal-body").scrollTop =
             document.getElementById("terminal-body").scrollHeight;
+          document.getElementById("cli-input").focus();
         }, 300);
       }
 
-      // Start Effect when page loads
+      // 💥 Start Boot Simulation when page loads instead of main terminal right away
       window.onload = () => {
-        setTimeout(typeWriter, 500);
+        simulateBootProcess();
       };
 
       // --- Functions to open/close Modal Iframe ---
@@ -544,8 +644,14 @@
       document.addEventListener("keydown", function (event) {
         const modal = document.getElementById("iframe-modal");
 
-        // --- Boot Sequence Controls ---
-        if (!isBootFinished && !modal.classList.contains("flex")) {
+        // --- Boot Sequence Controls (Main Terminal) ---
+        // Only allow space/enter if the OS loading screen is gone
+        const loadingScreen = document.getElementById("loading-screen");
+        if (
+          loadingScreen.style.display === "none" &&
+          !isBootFinished &&
+          !modal.classList.contains("flex")
+        ) {
           if (event.code === "Space") {
             event.preventDefault(); // Prevent scrolling
             togglePauseBoot();
@@ -635,7 +741,7 @@
       const cliInput = document.getElementById("cli-input");
       const terminalBody = document.getElementById("terminal-body");
 
-      // ตัวแปรสำหรับเก็บประวัติคำสั่ง (Command History)
+      // Array to store command history
       const commandHistory = [];
       let historyIndex = -1;
 
@@ -652,17 +758,52 @@
           this.value = ""; // Clear input
 
           if (command !== "") {
-            // บันทึกคำสั่งลงประวัติ และเลื่อน index ไปท้ายสุด
+            // Save command to history
             commandHistory.push(command);
             historyIndex = commandHistory.length;
 
             // Echo command
             const echoDiv = document.createElement("div");
-            echoDiv.innerHTML = `<div><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">${command}</span></div>`;
+            if (awaitingConfirmation) {
+              // If waiting for y/n, don't show the full prompt prefix
+              echoDiv.innerHTML = `<div><span class="text-[#f2cc60]">(y/n): </span><span class="cmd-input">${command}</span></div>`;
+            } else {
+              echoDiv.innerHTML = `<div><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">${command}</span></div>`;
+            }
             cliOutputContainer.appendChild(echoDiv);
 
-            // Process command
-            processCommand(command);
+            // Handle y/n confirmation
+            if (awaitingConfirmation === "deploy_profile") {
+              const ans = command.toLowerCase();
+              const outputDiv = document.createElement("div");
+
+              if (ans === "y" || ans === "yes") {
+                outputDiv.className = "mt-4 mb-8";
+                outputDiv.innerHTML = getDeployProfileContent();
+              } else {
+                outputDiv.className = "mt-2 mb-4 pl-4 text-[#8b949e]";
+                outputDiv.innerHTML =
+                  "Deployment aborted. Type 'help' to see available commands.";
+              }
+              cliOutputContainer.appendChild(outputDiv);
+
+              // Reset prompt to normal
+              awaitingConfirmation = null;
+              document.getElementById("cli-prompt-text").innerHTML =
+                `<span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ `;
+            } else {
+              // Process normal command
+              processCommand(command);
+            }
+          } else {
+            // If pressed Enter without typing
+            const echoDiv = document.createElement("div");
+            if (awaitingConfirmation) {
+              echoDiv.innerHTML = `<div><span class="text-[#f2cc60]">(y/n): </span></div>`;
+            } else {
+              echoDiv.innerHTML = `<div><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ </div>`;
+            }
+            cliOutputContainer.appendChild(echoDiv);
           }
 
           // Auto scroll to bottom
@@ -670,24 +811,24 @@
             terminalBody.scrollTop = terminalBody.scrollHeight;
           }, 50);
         } else if (e.key === "ArrowUp") {
-          e.preventDefault(); // ป้องกัน cursor กระโดดไปหน้าสุด
+          e.preventDefault(); // Prevent cursor from jumping to the beginning
           if (commandHistory.length > 0 && historyIndex > 0) {
             historyIndex--;
             this.value = commandHistory[historyIndex];
           }
         } else if (e.key === "ArrowDown") {
-          e.preventDefault(); // ป้องกัน cursor กระโดดไปหลังสุด
+          e.preventDefault(); // Prevent cursor from jumping to the end
           if (historyIndex < commandHistory.length - 1) {
             historyIndex++;
             this.value = commandHistory[historyIndex];
           } else if (historyIndex === commandHistory.length - 1) {
             historyIndex++;
-            this.value = ""; // เลื่อนลงมาล่างสุดแล้ว ให้เคลียร์ช่อง
+            this.value = ""; // Reached the bottom of history, clear input
           }
         }
       });
 
-      // จัดการ Command ด้วยฟังก์ชันที่ Refactor แล้ว
+      // Handle commands using refactored functions
       function processCommand(cmd) {
         const outputDiv = document.createElement("div");
         outputDiv.className = "mt-2 mb-4 pl-4 text-[#c9d1d9]";
@@ -695,7 +836,7 @@
         const lowerCmd = cmd.toLowerCase().trim();
 
         if (lowerCmd === "clear") {
-          // ล้างข้อมูลทั้งหมดในคอนเทนเนอร์ และซ่อน Boot Sequence
+          // Clear all output and hide boot sequence
           cliOutputContainer.innerHTML = "";
           if (bootSequence) bootSequence.style.display = "none";
           return;
@@ -745,8 +886,15 @@
           outputDiv.className = "mb-4";
           outputDiv.innerHTML = templates.archive();
         } else if (lowerCmd === "./deploy_profile.sh") {
-          outputDiv.className = "mt-4 mb-8"; // Add spacing for massive block
-          outputDiv.innerHTML = getDeployProfileContent();
+          // Instead of outputting data, switch to y/n prompt mode
+          outputDiv.className = "mt-2 mb-2 pl-4 text-[#f2cc60]";
+          outputDiv.innerHTML = `> Warning: This command will display the entire profile content. Proceed?`;
+          cliOutputContainer.appendChild(outputDiv);
+
+          awaitingConfirmation = "deploy_profile";
+          document.getElementById("cli-prompt-text").innerHTML =
+            `<span class="text-[#f2cc60]">(y/n): </span>`;
+          return; // Return early to stop execution and prevent empty outputDiv from appending
         } else if (
           lowerCmd === "sudo rm -rf /" ||
           lowerCmd === "sudo rm -rf *"
