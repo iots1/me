@@ -1010,6 +1010,94 @@
         }, 4000);
       }
 
+      function triggerCatEnvTrap(outputDiv) {
+        outputDiv.className = "mt-2 mb-4 pl-4 text-[#79c0ff]";
+        outputDiv.innerHTML = `Spawning infiltration cat to sniff .env file... 🐈`;
+        cliOutputContainer.appendChild(outputDiv);
+
+        let trapContainer = document.getElementById("cat-env-trap-container");
+        if (trapContainer) trapContainer.remove();
+
+        trapContainer = document.createElement("div");
+        trapContainer.id = "cat-env-trap-container";
+        trapContainer.style.position = "fixed";
+        trapContainer.style.bottom = "15%";
+        trapContainer.style.left = "50%";
+        trapContainer.style.transform = "translateX(-50%)";
+        trapContainer.style.zIndex = "10000";
+        trapContainer.style.display = "flex";
+        trapContainer.style.alignItems = "center";
+        trapContainer.style.perspective = "800px";
+        trapContainer.style.width = "300px";
+        trapContainer.style.justifyContent = "space-between";
+        trapContainer.style.pointerEvents = "none";
+
+        // The sneaky cat emoji
+        const cat = document.createElement("div");
+        cat.innerHTML = "🐈";
+        cat.style.fontSize = "5rem";
+        cat.style.transform = "translateX(-300px)"; // Start off-screen left
+        cat.style.transition = "transform 1.5s linear";
+        cat.style.filter = "drop-shadow(0 10px 10px rgba(0,0,0,0.5))";
+
+        // The .env vault (3D Card)
+        const vault = document.createElement("div");
+        vault.innerHTML = `
+              <div style="background: #161b22; border: 2px dashed #f2cc60; padding: 15px; border-radius: 8px; color: #f2cc60; font-weight: bold; box-shadow: 0 0 15px rgba(242, 204, 96, 0.4); transform: rotateY(-30deg);">
+                  .env
+              </div>
+              <div id="firewall-block" style="position: absolute; top: -20px; bottom: -20px; left: -20px; right: -20px; background: rgba(255, 95, 86, 0.8); border: 3px solid #ff5f56; border-radius: 10px; box-shadow: 0 0 30px #ff5f56; opacity: 0; transform: translateZ(50px) scale(1.5); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.5rem; backdrop-filter: blur(4px);">
+                  BLOCKED
+              </div>
+          `;
+        vault.style.position = "relative";
+        vault.style.transformStyle = "preserve-3d";
+
+        trapContainer.appendChild(cat);
+        trapContainer.appendChild(vault);
+        document.body.appendChild(trapContainer);
+
+        // Animation Sequence
+        setTimeout(() => {
+          // 1. Cat moves in towards the vault
+          cat.style.transform = "translateX(0px)";
+        }, 100);
+
+        setTimeout(() => {
+          // 2. Firewall drops down
+          const firewall = document.getElementById("firewall-block");
+          if (firewall) {
+            firewall.style.opacity = "1";
+            firewall.style.transform = "translateZ(50px) scale(1)";
+          }
+
+          // 3. Cat gets shocked and runs away
+          cat.innerHTML = "🙀";
+          cat.style.transition = "transform 0.5s ease-out";
+          cat.style.transform = "translateX(-50px) scaleX(-1)"; // jump back and turn around
+
+          setTimeout(() => {
+            cat.style.transition = "transform 1s ease-in";
+            cat.style.transform = "translateX(-400px) scaleX(-1)"; // run off screen left
+          }, 500);
+
+          // 4. Print final denial message
+          setTimeout(() => {
+            const finalDiv = document.createElement("div");
+            finalDiv.className = "mt-2 mb-4 pl-4 text-[#ffbd2e]";
+            finalDiv.innerHTML = `Access Denied. Nice try! As a Senior Backend Dev, my secrets are securely managed and injected via CI/CD. No plaintext passwords here! 😎🔒`;
+            cliOutputContainer.appendChild(finalDiv);
+            document.getElementById("terminal-body").scrollTop =
+              document.getElementById("terminal-body").scrollHeight;
+          }, 800);
+        }, 1600); // Wait 1.5s for cat to arrive + 0.1s buffer
+
+        // Cleanup DOM
+        setTimeout(() => {
+          trapContainer.remove();
+        }, 4000);
+      }
+
       function triggerBongoCat(outputDiv) {
         outputDiv.className = "mt-2 mb-4 pl-4 text-[#7ee787]";
         outputDiv.innerHTML = `Summoning Hacker Cat... 🐱💻`;
@@ -1092,9 +1180,8 @@
             break;
 
           case "cat .env":
-            outputDiv.className = "mt-2 mb-4 pl-4 text-[#ffbd2e]";
-            outputDiv.innerHTML = `Access Denied. Nice try! As a Senior Backend Dev, my secrets are securely managed and injected via CI/CD. No plaintext passwords here! 😎🔒`;
-            break;
+            triggerCatEnvTrap(outputDiv);
+            return;
 
           case "cat contact.txt":
           case "contact":
