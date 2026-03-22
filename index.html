@@ -1,0 +1,828 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jirayu Mool-ang | Senior Backend Developer</title>
+    <!-- Use Tailwind CSS for Layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Set Monospace Font for Terminal Realism */
+      @import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap");
+
+      body {
+        font-family: "Fira Code", monospace;
+        background-color: #0d1117; /* GitHub Dark Dimmed Background */
+        color: #c9d1d9;
+      }
+
+      /* Custom Scrollbar to match the theme */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0d1117;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #30363d;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #8b949e;
+      }
+
+      /* Animation for blinking cursor */
+      .cursor-blink {
+        animation: blink 1s step-end infinite;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+
+      /* Specific colors for simulated Syntax Highlighting */
+      .cmd-prompt {
+        color: #7ee787;
+      } /* Green */
+      .cmd-dir {
+        color: #79c0ff;
+      } /* Blue */
+      .cmd-input {
+        color: #f2cc60;
+      } /* Yellow */
+      .json-key {
+        color: #79c0ff;
+      }
+      .json-string {
+        color: #a5d6ff;
+      }
+      .json-number {
+        color: #f2cc60;
+      }
+      .comment {
+        color: #8b949e;
+        font-style: italic;
+      }
+      .link-hover {
+        transition: all 0.2s ease-in-out;
+      }
+      .link-hover:hover {
+        color: #58a6ff;
+        text-decoration: underline;
+        text-shadow: 0 0 8px rgba(88, 166, 255, 0.4);
+      }
+
+      /* Matrix Canvas */
+      #matrix-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 9999;
+        pointer-events: none;
+        display: none;
+        background: black;
+      }
+
+      /* Draggable Header Cursor */
+      .draggable-header {
+        cursor: grab;
+      }
+      .draggable-header:active {
+        cursor: grabbing;
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen p-2 sm:p-6 md:p-10 flex justify-center items-center overflow-hidden"
+  >
+    <!-- Matrix Canvas Overlay (Hidden by default) -->
+    <canvas id="matrix-canvas"></canvas>
+
+    <!-- Terminal Window Container -->
+    <div
+      id="terminal-window"
+      class="w-full max-w-5xl bg-[#161b22] border border-[#30363d] rounded-lg shadow-2xl overflow-hidden flex flex-col h-[90vh] md:h-auto md:max-h-[90vh] relative z-10"
+      style="transition: transform 0.1s ease-out"
+    >
+      <!-- Terminal Header (Mac/Linux Style) -->
+      <div
+        id="terminal-header"
+        class="bg-[#010409] px-4 py-3 flex items-center border-b border-[#30363d] shrink-0 draggable-header select-none"
+      >
+        <div class="flex gap-2">
+          <div class="w-3.5 h-3.5 rounded-full bg-[#ff5f56]"></div>
+          <div class="w-3.5 h-3.5 rounded-full bg-[#ffbd2e]"></div>
+          <div class="w-3.5 h-3.5 rounded-full bg-[#27c93f]"></div>
+        </div>
+        <div
+          class="flex-1 text-center text-[#8b949e] text-xs sm:text-sm font-medium tracking-wider"
+        >
+          jirayu@backend-node: ~/portfolio
+        </div>
+      </div>
+
+      <!-- Terminal Body -->
+      <div class="p-4 sm:p-6 overflow-y-auto grow" id="terminal-body">
+        <!-- Boot Sequence (Simulated typing) -->
+        <div id="boot-sequence" class="mb-6 text-sm sm:text-base relative">
+          <!-- Boot Controls -->
+          <div
+            id="boot-controls"
+            class="absolute top-0 right-0 flex gap-2 z-20"
+          >
+            <button
+              id="pause-boot-btn"
+              onclick="togglePauseBoot()"
+              class="text-[#f2cc60] hover:text-white font-mono text-[10px] sm:text-xs px-2 py-1 border border-[#f2cc60] rounded hover:bg-[#f2cc60]/20 transition-colors focus:outline-none"
+            >
+              [Space] PAUSE
+            </button>
+            <button
+              id="skip-boot-btn"
+              onclick="skipBoot()"
+              class="text-[#79c0ff] hover:text-white font-mono text-[10px] sm:text-xs px-2 py-1 border border-[#79c0ff] rounded hover:bg-[#79c0ff]/20 transition-colors focus:outline-none"
+            >
+              [Enter] SKIP
+            </button>
+          </div>
+
+          <pre
+            class="text-[#7ee787] font-bold text-[10px] sm:text-xs mb-4 leading-tight"
+          >
+       __ ___________  ___   __  ____  __
+      / // /  _/ __ \/ _ | / / / / / / / 
+   __/ // // // /_/ / __ |/ /_/ / /_/ /  
+  /___/___/___/ .___/_/ |_|\____/\____/  
+             /_/                         
+                </pre
+          >
+          <div class="text-[#8b949e]">
+            Last login: <span id="current-time"></span> on ttys001
+          </div>
+          <div>
+            <span class="cmd-prompt">guest@system</span>:<span class="cmd-dir"
+              >~</span
+            >$ <span id="typing-text"></span
+            ><span
+              id="initial-cursor"
+              class="cursor-blink bg-gray-400 w-2 h-5 inline-block align-middle ml-1"
+            ></span>
+          </div>
+        </div>
+
+        <!-- Dynamic CLI Output Container (Everything goes here now) -->
+        <div
+          id="cli-output-container"
+          class="space-y-4 pt-4 text-sm sm:text-base"
+        ></div>
+
+        <!-- End Prompt (Interactive) -->
+        <div class="pt-4 pb-10 flex items-center" id="cli-input-line">
+          <span class="cmd-prompt">guest@system</span>:<span class="cmd-dir"
+            >~/portfolio</span
+          >$
+          <input
+            type="text"
+            id="cli-input"
+            class="ml-2 bg-transparent border-none outline-none text-[#f2cc60] font-mono flex-1 w-full"
+            autofocus
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Fullscreen Iframe Modal (Hidden by default) -->
+    <div
+      id="iframe-modal"
+      class="fixed inset-0 z-50 hidden bg-black/95 flex-col backdrop-blur-sm"
+    >
+      <!-- Modal Header -->
+      <div
+        class="bg-[#010409] px-4 py-3 flex items-center justify-between border-b border-[#30363d] shrink-0 shadow-lg"
+      >
+        <div class="flex gap-2 items-center">
+          <div
+            id="modal-title"
+            class="text-[#8b949e] font-mono text-xs sm:text-sm tracking-wider"
+          >
+            > Running: view_document...
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button
+            id="open-external-btn"
+            onclick="openExternal()"
+            class="text-[#79c0ff] hover:text-white font-mono text-xs sm:text-sm font-bold px-3 py-1.5 rounded border border-[#79c0ff] hover:bg-[#58a6ff] hover:border-[#58a6ff] transition-colors focus:outline-none"
+          >
+            [↗] NEW TAB
+          </button>
+          <button
+            id="close-modal-btn"
+            onclick="closeModal()"
+            class="text-[#ff7b72] hover:text-white font-mono text-xs sm:text-sm font-bold px-3 py-1.5 rounded border border-[#ff7b72] hover:bg-[#ff5f56] hover:border-[#ff5f56] transition-colors focus:outline-none"
+          >
+            [Ctrl+X] CLOSE
+          </button>
+        </div>
+      </div>
+      <!-- Modal Body (Iframe) -->
+      <div class="flex-grow w-full h-full relative bg-[#0d1117]">
+        <iframe
+          id="canva-iframe"
+          src=""
+          class="absolute inset-0 w-full h-full border-none"
+          allowfullscreen="allowfullscreen"
+          allow="fullscreen"
+        ></iframe>
+      </div>
+    </div>
+
+    <script>
+      // Set fake current date/time for Last login line
+      document.getElementById("current-time").innerText =
+        new Date().toLocaleString("en-US", {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+
+      // --- Refactored Content Templates ---
+      // เก็บ HTML ของแต่ละคำสั่งไว้เป็นฟังก์ชัน เพื่อให้เรียกใช้ซ้ำได้แบบเป๊ะๆ 100%
+      const templates = {
+        whoami: () => `
+                <div class="mt-4 pl-4 border-l-2 border-[#30363d]">
+                    <h1 class="text-2xl sm:text-4xl font-bold text-white mb-2">Jirayu Mool-ang</h1>
+                    <h2 class="text-lg sm:text-xl text-[#ff7b72] mb-4">> Senior Backend Developer & Software Architect</h2>
+                    <p class="text-[#c9d1d9] leading-relaxed max-w-3xl">
+                        Experienced Full Stack Developer and DevOps specialist with over 9 years of expertise in designing, developing, and deploying scalable, high-performance web and mobile applications.<br>
+                        I specialize in building high-availability architectures (HIS/ERP) that handle massive growth and high-concurrency workloads without compromising data integrity.
+                    </p>
+                </div>
+            `,
+        contact: () => `
+                <div class="mt-2 pl-4 flex flex-col gap-2">
+                    <div><span class="json-key">Location:</span> <span class="json-string">Chiang Mai, Thailand</span></div>
+                    <div><span class="json-key">Email:</span> <a href="mailto:jirayu.moolang@gmail.com" class="json-string link-hover">jirayu.moolang@gmail.com</a></div>
+                    <div><span class="json-key">GitHub:</span> <a href="https://github.com/iots1" target="_blank" class="json-string link-hover">github.com/iots1</a></div>
+                    <div><span class="json-key">LinkedIn:</span> <a href="https://www.linkedin.com/in/jirayu-moolang/" target="_blank" class="json-string link-hover">linkedin.com/in/jirayu-moolang</a></div>
+                    <div><span class="json-key">Engineering Blueprint:</span> <a href="https://iots1.github.io/enterprise-backend-blueprint/" target="_blank" class="json-string link-hover">iots1.github.io/enterprise-backend-blueprint/</a></div>
+                    <div><span class="json-key">Resume:</span> <button onclick="openModal('https://www.canva.com/design/DAEo4YHBhOo/rvu9YVBl4cl3HrEY7U3vJg/view?embed', 'view_resume')" class="json-string link-hover cursor-pointer bg-transparent border-none p-0 text-left font-mono">View Full Resume</button></div>
+                    <div><span class="json-key">Portfolio:</span> <button onclick="openModal('https://www.canva.com/design/DAGcELaBz6s/XTNrSNzgNL1qGsFt7B4q6A/view?embed', 'view_portfolio')" class="json-string link-hover cursor-pointer bg-transparent border-none p-0 text-left font-mono">View Interactive Portfolio</button></div>
+                </div>
+            `,
+        skills: () => `
+                <div class="mt-2 text-[#c9d1d9]">
+<pre class="whitespace-pre-wrap font-mono text-xs sm:text-sm">
+{
+  <span class="json-key">"core_architecture"</span>: [
+    <span class="json-string">"Modular Monorepo (Nx)"</span>, 
+    <span class="json-string">"Microservices"</span>, 
+    <span class="json-string">"Clean Architecture"</span>
+  ],
+  <span class="json-key">"backend_frameworks"</span>: [
+    <span class="json-string">"NestJS"</span>, <span class="json-string">"Golang (Gin & Echo)"</span>, <span class="json-string">"Angular"</span>, <span class="json-string">"Express.js"</span>
+  ],
+  <span class="json-key">"database_and_state"</span>: [
+    <span class="json-string">"PostgreSQL (Replication/Optimization)"</span>, 
+    <span class="json-string">"Redis (Stateful JWT & Task Queues)"</span>, 
+    <span class="json-string">"MongoDB"</span>, <span class="json-string">"MySQL"</span>
+  ],
+  <span class="json-key">"ai_and_search"</span>: [
+    <span class="json-string">"Ollama"</span>, <span class="json-string">"pgvector (RAG)"</span>, <span class="json-string">"Rule-based Engines"</span>
+  ],
+  <span class="json-key">"infrastructure_and_devops"</span>: [
+    <span class="json-string">"Docker & Docker Swarm"</span>, <span class="json-string">"Kubernetes"</span>, <span class="json-string">"Proxmox"</span>, 
+    <span class="json-string">"DigitalOcean"</span>, <span class="json-string">"Huawei Cloud"</span>, <span class="json-string">"GitHub Actions CI/CD"</span>, 
+    <span class="json-string">"GitLab CI/CD"</span>, <span class="json-string">"PM2"</span>
+  ]
+}
+</pre>
+                </div>
+            `,
+        experience: () => `
+                <div class="mt-4 space-y-6">
+                    <!-- Job 1 -->
+                    <div class="relative pl-6 border-l-2 border-[#238636]">
+                        <div class="absolute w-3 h-3 bg-[#238636] rounded-full -left-[7px] top-1.5"></div>
+                        <h3 class="text-xl font-bold text-white">Senior Backend Developer <span class="text-[#8b949e] font-normal text-sm sm:text-base">@ Dudee Indeed</span></h3>
+                        <div class="text-sm text-[#8b949e] mb-2">Sep 2025 - Present | Chiang Mai, Thailand</div>
+                        <ul class="list-disc list-inside text-[#c9d1d9] space-y-1 mt-2">
+                            <li>Lead backend engineering teams by establishing a robust foundation.</li>
+                            <li><strong>Architecture:</strong> Modular Monorepo (Nx) with NestJS Microservices following Clean Architecture.</li>
+                            <li><strong>Infrastructure:</strong> Managing on-premise virtualization with Proxmox, ensuring high availability via PM2.</li>
+                            <li><strong>AI Integration:</strong> Implementing Generative AI solutions using Ollama and RAG pipelines.</li>
+                        </ul>
+                    </div>
+                    <!-- Job 2 -->
+                    <div class="relative pl-6 border-l-2 border-[#30363d]">
+                        <div class="absolute w-3 h-3 bg-[#30363d] rounded-full -left-[7px] top-1.5"></div>
+                        <h3 class="text-xl font-bold text-white">DevOps Engineer & Full Stack Developer <span class="text-[#8b949e] font-normal text-sm sm:text-base">@ Innonity Co., Ltd.</span></h3>
+                        <div class="text-sm text-[#8b949e] mb-2">Oct 2021 - Aug 2025 | Chiang Mai, Thailand</div>
+                        <ul class="list-disc list-inside text-[#c9d1d9] space-y-1 mt-2">
+                            <li>Spearheaded end-to-end development of <strong>Droprich</strong>, a high-scale Social Commerce & Affiliate platform.</li>
+                            <li><strong>Core Product:</strong> Lead developer for mobile app (Flutter) powered by high-performance Golang & Laravel backends.</li>
+                            <li><strong>MLM Engine:</strong> Architected complex Multi-level Marketing structures and real-time commission calculations.</li>
+                            <li><strong>Fintech:</strong> Integrated LianLian Payment Gateway for high-volume secure transactions.</li>
+                            <li><strong>Infrastructure:</strong> Scaled platform using Kubernetes on DigitalOcean and Huawei Cloud (Grafana/Prometheus).</li>
+                        </ul>
+                    </div>
+                    <!-- Job 3 -->
+                    <div class="relative pl-6 border-l-2 border-[#30363d]">
+                        <div class="absolute w-3 h-3 bg-[#30363d] rounded-full -left-[7px] top-1.5"></div>
+                        <h3 class="text-xl font-bold text-white">Full Stack Developer <span class="text-[#8b949e] font-normal text-sm sm:text-base">@ Seed Soft Solution Co., Ltd.</span></h3>
+                        <div class="text-sm text-[#8b949e] mb-2">Oct 2018 - 2021</div>
+                        <ul class="list-disc list-inside text-[#c9d1d9] space-y-1 mt-2">
+                            <li>WiFi Hotspot & Mailchimp integration (Express.js).</li>
+                            <li>POS laundry shop (Angular + API NestJS + Flutter).</li>
+                            <li>Cosmetic Management System (Angular + API Codeigniter).</li>
+                        </ul>
+                    </div>
+                    <div class="pl-6 text-[#8b949e] italic text-sm">
+                        # Use \`cat old_experience.log\` to view previous roles (Network Engineer @ Ting Ting, Java Dev @ JTM Solutions).
+                    </div>
+                </div>
+            `,
+        education: () => `
+                <div class="mt-2 pl-4 text-[#c9d1d9]">
+                    <div class="mb-3">
+                        <div class="text-white font-semibold">Rajamangala University of Technology Tak (2013 - 2016)</div>
+                        <div class="text-[#8b949e]">Bachelor of Computer Engineering</div>
+                        <div class="text-sm">- Project: Face Recognition (Python + OpenCV)</div>
+                    </div>
+                    <div>
+                        <div class="text-white font-semibold">Thoeng Industrial and Community Education College (2008 - 2013)</div>
+                        <div class="text-[#8b949e]">High Vocational Certificate in Computer Technology</div>
+                    </div>
+                </div>
+            `,
+        archive: () => `
+                <div class="mt-2 pl-4 font-mono text-xs sm:text-sm text-[#c9d1d9]">
+                    <div class="text-[#8b949e]">total 42</div>
+                    <div>drwxr-xr-x  2 jirayu dev  4096 Mar 22 11:00 <span class="text-[#79c0ff]">.</span></div>
+                    <div>drwxr-xr-x 10 jirayu dev  4096 Mar 22 11:00 <span class="text-[#79c0ff]">..</span></div>
+                    <div class="text-[#8b949e] italic mt-2"># Highlighted projects from University / College era:</div>
+                    <div>-rw-r--r--  1 jirayu dev 14231 Mar 22 11:00 <span class="text-white">face_recognition_opencv.py</span></div>
+                    <div>-rw-r--r--  1 jirayu dev  8192 Mar 22 11:00 <span class="text-white">industrial_robot_arm_2011.cpp</span></div>
+                    <div>-rw-r--r--  1 jirayu dev  4096 Mar 22 11:00 <span class="text-white">abu_robot_rescue_2012.c</span></div>
+                </div>
+            `,
+      };
+
+      // ฟังก์ชันสร้าง Content ชุดใหญ่สำหรับ ./deploy_profile.sh
+      function getDeployProfileContent() {
+        return `
+                <div class="space-y-8">
+                    <div>
+                        <div><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">whoami</span></div>
+                        ${templates.whoami()}
+                    </div>
+                    <div>
+                        <div><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">cat contact.txt</span></div>
+                        ${templates.contact()}
+                    </div>
+                    <div>
+                        <div><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">cat skills.json</span></div>
+                        ${templates.skills()}
+                    </div>
+                    <div>
+                        <div><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">./show_experience.sh --latest-first</span></div>
+                        ${templates.experience()}
+                    </div>
+                    <div>
+                        <div><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">tail -n 5 education.log</span></div>
+                        ${templates.education()}
+                    </div>
+                    <div>
+                        <div><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">ls -la ./academic_archive/</span></div>
+                        ${templates.archive()}
+                    </div>
+                </div>
+            `;
+      }
+
+      // --- Boot Sequence & Typing Effect ---
+      const scriptText = "./deploy_profile.sh";
+      const typingElement = document.getElementById("typing-text");
+      const cliOutputContainer = document.getElementById(
+        "cli-output-container",
+      );
+      const bootSequence = document.getElementById("boot-sequence");
+      const bootControls = document.getElementById("boot-controls");
+      let charIndex = 0;
+      let isBootPaused = false;
+      let isBootFinished = false;
+
+      function typeWriter() {
+        if (isBootFinished) return;
+        if (isBootPaused) return;
+
+        if (charIndex < scriptText.length) {
+          typingElement.innerHTML += scriptText.charAt(charIndex);
+          charIndex++;
+          setTimeout(typeWriter, Math.random() * 50 + 50); // Random typing speed
+        } else {
+          finishBootSequence();
+        }
+      }
+
+      function togglePauseBoot() {
+        if (isBootFinished) return;
+        isBootPaused = !isBootPaused;
+        const pauseBtn = document.getElementById("pause-boot-btn");
+        if (isBootPaused) {
+          pauseBtn.innerText = "[Space] RESUME";
+          pauseBtn.classList.replace("text-[#f2cc60]", "text-[#27c93f]");
+          pauseBtn.classList.replace("border-[#f2cc60]", "border-[#27c93f]");
+        } else {
+          pauseBtn.innerText = "[Space] PAUSE";
+          pauseBtn.classList.replace("text-[#27c93f]", "text-[#f2cc60]");
+          pauseBtn.classList.replace("border-[#27c93f]", "border-[#f2cc60]");
+          typeWriter(); // Resume typing
+        }
+      }
+
+      function skipBoot() {
+        if (isBootFinished) return;
+        isBootFinished = true;
+        typingElement.innerHTML = scriptText; // Fill remaining text instantly
+        finishBootSequence();
+      }
+
+      function finishBootSequence() {
+        isBootFinished = true;
+        if (bootControls) bootControls.style.display = "none";
+
+        const initialCursor = document.getElementById("initial-cursor");
+        if (initialCursor) initialCursor.style.display = "none";
+
+        // Wait a moment then dynamically append the full profile
+        setTimeout(() => {
+          const initDiv = document.createElement("div");
+          initDiv.innerHTML = getDeployProfileContent();
+          cliOutputContainer.appendChild(initDiv);
+
+          // Scroll to bottom
+          document.getElementById("terminal-body").scrollTop =
+            document.getElementById("terminal-body").scrollHeight;
+        }, 300);
+      }
+
+      // Start Effect when page loads
+      window.onload = () => {
+        setTimeout(typeWriter, 500);
+      };
+
+      // --- Functions to open/close Modal Iframe ---
+      let currentIframeUrl = "";
+
+      function openModal(url, title = "view_document") {
+        const modal = document.getElementById("iframe-modal");
+        const iframe = document.getElementById("canva-iframe");
+        const modalTitle = document.getElementById("modal-title");
+
+        if (modalTitle) modalTitle.innerText = `> Running: ${title}...`;
+
+        currentIframeUrl = url;
+        iframe.src = url;
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        document.body.style.overflow = "hidden"; // Prevent scrolling on main page
+
+        // Focus on close button to receive keyboard events immediately
+        document.getElementById("close-modal-btn").focus();
+      }
+
+      function closeModal() {
+        const modal = document.getElementById("iframe-modal");
+        const iframe = document.getElementById("canva-iframe");
+
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        iframe.src = ""; // Clear URL to stop loading/playing media in Iframe
+        document.body.style.overflow = "auto"; // Restore scrolling
+
+        // Refocus CLI
+        setTimeout(() => document.getElementById("cli-input")?.focus(), 100);
+      }
+
+      function openExternal() {
+        if (currentIframeUrl) {
+          // Remove ?embed if it exists so Canva shows properly externally
+          const externalUrl = currentIframeUrl.replace("?embed", "");
+          window.open(externalUrl, "_blank");
+        }
+      }
+
+      // Catch keyboard events (Ctrl+X or Escape) to close Modal
+      document.addEventListener("keydown", function (event) {
+        const modal = document.getElementById("iframe-modal");
+
+        // --- Boot Sequence Controls ---
+        if (!isBootFinished && !modal.classList.contains("flex")) {
+          if (event.code === "Space") {
+            event.preventDefault(); // Prevent scrolling
+            togglePauseBoot();
+          } else if (event.code === "Enter") {
+            event.preventDefault();
+            skipBoot();
+          }
+        }
+
+        // Check if Modal is open
+        if (!modal.classList.contains("hidden")) {
+          // If Ctrl + X or Esc is pressed
+          if (
+            (event.ctrlKey && event.key.toLowerCase() === "x") ||
+            event.key === "Escape"
+          ) {
+            event.preventDefault(); // Prevent default browser action
+            closeModal();
+          }
+        }
+      });
+
+      // --- Draggable Window ---
+      const terminalWindow = document.getElementById("terminal-window");
+      const terminalHeader = document.getElementById("terminal-header");
+      let isDragging = false;
+      let currentX;
+      let currentY;
+      let initialX;
+      let initialY;
+      let xOffset = 0;
+      let yOffset = 0;
+
+      terminalHeader.addEventListener("mousedown", dragStart);
+      document.addEventListener("mouseup", dragEnd);
+      document.addEventListener("mousemove", drag);
+
+      terminalHeader.addEventListener("touchstart", dragStart, {
+        passive: false,
+      });
+      document.addEventListener("touchend", dragEnd);
+      document.addEventListener("touchmove", drag, { passive: false });
+
+      function dragStart(e) {
+        if (e.type === "touchstart") {
+          initialX = e.touches[0].clientX - xOffset;
+          initialY = e.touches[0].clientY - yOffset;
+        } else {
+          initialX = e.clientX - xOffset;
+          initialY = e.clientY - yOffset;
+        }
+        if (
+          e.target === terminalHeader ||
+          e.target.parentNode === terminalHeader
+        ) {
+          isDragging = true;
+        }
+      }
+
+      function dragEnd() {
+        initialX = currentX;
+        initialY = currentY;
+        isDragging = false;
+      }
+
+      function drag(e) {
+        if (isDragging) {
+          e.preventDefault();
+          if (e.type === "touchmove") {
+            currentX = e.touches[0].clientX - initialX;
+            currentY = e.touches[0].clientY - initialY;
+          } else {
+            currentX = e.clientX - initialX;
+            currentY = e.clientY - initialY;
+          }
+          xOffset = currentX;
+          yOffset = currentY;
+          setTranslate(currentX, currentY, terminalWindow);
+        }
+      }
+
+      function setTranslate(xPos, yPos, el) {
+        el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+      }
+
+      // --- Interactive CLI ---
+      const cliInput = document.getElementById("cli-input");
+      const terminalBody = document.getElementById("terminal-body");
+
+      // ตัวแปรสำหรับเก็บประวัติคำสั่ง (Command History)
+      const commandHistory = [];
+      let historyIndex = -1;
+
+      // Keep focus on input when clicking inside terminal
+      terminalBody.addEventListener("click", () => {
+        if (window.getSelection().toString() === "") {
+          cliInput.focus();
+        }
+      });
+
+      cliInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          const command = this.value.trim();
+          this.value = ""; // Clear input
+
+          if (command !== "") {
+            // บันทึกคำสั่งลงประวัติ และเลื่อน index ไปท้ายสุด
+            commandHistory.push(command);
+            historyIndex = commandHistory.length;
+
+            // Echo command
+            const echoDiv = document.createElement("div");
+            echoDiv.innerHTML = `<div><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">${command}</span></div>`;
+            cliOutputContainer.appendChild(echoDiv);
+
+            // Process command
+            processCommand(command);
+          }
+
+          // Auto scroll to bottom
+          setTimeout(() => {
+            terminalBody.scrollTop = terminalBody.scrollHeight;
+          }, 50);
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault(); // ป้องกัน cursor กระโดดไปหน้าสุด
+          if (commandHistory.length > 0 && historyIndex > 0) {
+            historyIndex--;
+            this.value = commandHistory[historyIndex];
+          }
+        } else if (e.key === "ArrowDown") {
+          e.preventDefault(); // ป้องกัน cursor กระโดดไปหลังสุด
+          if (historyIndex < commandHistory.length - 1) {
+            historyIndex++;
+            this.value = commandHistory[historyIndex];
+          } else if (historyIndex === commandHistory.length - 1) {
+            historyIndex++;
+            this.value = ""; // เลื่อนลงมาล่างสุดแล้ว ให้เคลียร์ช่อง
+          }
+        }
+      });
+
+      // จัดการ Command ด้วยฟังก์ชันที่ Refactor แล้ว
+      function processCommand(cmd) {
+        const outputDiv = document.createElement("div");
+        outputDiv.className = "mt-2 mb-4 pl-4 text-[#c9d1d9]";
+
+        const lowerCmd = cmd.toLowerCase().trim();
+
+        if (lowerCmd === "clear") {
+          // ล้างข้อมูลทั้งหมดในคอนเทนเนอร์ และซ่อน Boot Sequence
+          cliOutputContainer.innerHTML = "";
+          if (bootSequence) bootSequence.style.display = "none";
+          return;
+        } else if (lowerCmd === "help") {
+          outputDiv.innerHTML = `
+                    <div>Available commands:</div>
+                    <ul class="list-disc list-inside mt-1 ml-2 text-[#8b949e]">
+                        <li><span class="text-[#79c0ff]">whoami</span> - Display profile information</li>
+                        <li><span class="text-[#79c0ff]">cat contact.txt</span> - Show contact details</li>
+                        <li><span class="text-[#79c0ff]">cat skills.json</span> - List technical skills</li>
+                        <li><span class="text-[#79c0ff]">./show_experience.sh</span> - Show work experience</li>
+                        <li><span class="text-[#79c0ff]">tail -n 5 education.log</span> - Show education history</li>
+                        <li><span class="text-[#79c0ff]">ls -la ./academic_archive/</span> - Show university projects</li>
+                        <li><span class="text-[#79c0ff]">./deploy_profile.sh</span> - Display entire profile</li>
+                        <li><span class="text-[#79c0ff]">clear</span> - Clear terminal output</li>
+                        <li><span class="text-[#79c0ff]">exit</span> - Restart terminal session</li>
+                        <li><span class="text-[#79c0ff]">matrix</span> - ???</li>
+                    </ul>
+                `;
+        } else if (lowerCmd === "whoami") {
+          outputDiv.className = "mb-4"; // Remove padding for this specific block to match layout
+          outputDiv.innerHTML = templates.whoami();
+        } else if (lowerCmd === "cat contact.txt" || lowerCmd === "contact") {
+          outputDiv.className = "mb-4";
+          outputDiv.innerHTML = templates.contact();
+        } else if (lowerCmd === "cat skills.json" || lowerCmd === "skills") {
+          outputDiv.className = "mb-4";
+          outputDiv.innerHTML = templates.skills();
+        } else if (
+          lowerCmd === "./show_experience.sh" ||
+          lowerCmd === "./show_experience.sh --latest-first" ||
+          lowerCmd === "experience"
+        ) {
+          outputDiv.className = "mb-4";
+          outputDiv.innerHTML = templates.experience();
+        } else if (
+          lowerCmd === "tail -n 5 education.log" ||
+          lowerCmd === "education"
+        ) {
+          outputDiv.className = "mb-4";
+          outputDiv.innerHTML = templates.education();
+        } else if (
+          lowerCmd === "ls -la ./academic_archive/" ||
+          lowerCmd === "ls -la ./academic_archive" ||
+          lowerCmd === "archive"
+        ) {
+          outputDiv.className = "mb-4";
+          outputDiv.innerHTML = templates.archive();
+        } else if (lowerCmd === "./deploy_profile.sh") {
+          outputDiv.className = "mt-4 mb-8"; // Add spacing for massive block
+          outputDiv.innerHTML = getDeployProfileContent();
+        } else if (
+          lowerCmd === "sudo rm -rf /" ||
+          lowerCmd === "sudo rm -rf *"
+        ) {
+          outputDiv.className = "mt-2 mb-4 pl-4 text-[#ff7b72]";
+          outputDiv.innerHTML = `
+                    <div>rm: it is dangerous to operate recursively on '/'</div>
+                    <div>rm: use --no-preserve-root to override this failsafe</div>
+                    <div class="mt-2 font-bold animate-pulse text-white">NICE TRY, HACKER! 😉</div>
+                `;
+        } else if (lowerCmd === "matrix") {
+          outputDiv.className = "mt-2 mb-4 pl-4 text-[#7ee787]";
+          outputDiv.innerHTML = `Initiating Matrix protocol... (Click anywhere or press any key to stop)`;
+          startMatrix();
+        } else if (lowerCmd === "exit") {
+          outputDiv.innerHTML = `Logging out... Restarting session...`;
+          cliOutputContainer.appendChild(outputDiv);
+
+          setTimeout(() => {
+            window.location.reload();
+          }, 800);
+          return;
+        } else {
+          outputDiv.innerHTML = `bash: ${cmd}: command not found. Type 'help' for available commands.`;
+        }
+
+        cliOutputContainer.appendChild(outputDiv);
+      }
+
+      // --- Matrix Digital Rain ---
+      let matrixInterval;
+      function startMatrix() {
+        const canvas = document.getElementById("matrix-canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.style.display = "block";
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const katakana =
+          "アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロゴゾドボポヴッン";
+        const latin = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const nums = "0123456789";
+        const alphabet = katakana + latin + nums;
+
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+
+        for (let x = 0; x < columns; x++) {
+          drops[x] = 1;
+        }
+
+        if (matrixInterval) clearInterval(matrixInterval);
+
+        const draw = () => {
+          ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          ctx.fillStyle = "#0F0";
+          ctx.font = fontSize + "px monospace";
+
+          for (let i = 0; i < drops.length; i++) {
+            const text = alphabet.charAt(
+              Math.floor(Math.random() * alphabet.length),
+            );
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+              drops[i] = 0;
+            }
+            drops[i]++;
+          }
+        };
+
+        matrixInterval = setInterval(draw, 33);
+
+        // Stop matrix on click or any key press
+        const stopMatrix = () => {
+          clearInterval(matrixInterval);
+          canvas.style.display = "none";
+          document.removeEventListener("keydown", stopMatrix);
+          document.removeEventListener("mousedown", stopMatrix);
+        };
+
+        // Short delay to prevent immediate closing
+        setTimeout(() => {
+          document.addEventListener("keydown", stopMatrix);
+          document.addEventListener("mousedown", stopMatrix);
+        }, 500);
+      }
+    </script>
+  </body>
+</html>
