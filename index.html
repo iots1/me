@@ -1125,9 +1125,14 @@
         // Slide up animation
         setTimeout(() => (bongo.style.bottom = "20px"), 100);
 
+        // Play bongo theme music
+        const bongoAudio = new Audio("./Duck tale - The Moon.mp3");
+        bongoAudio.play().catch(err => console.log("Audio playback failed:", err));
+
         // Hide after 5 seconds
         setTimeout(() => {
           bongo.style.bottom = "-300px";
+          bongoAudio.pause();
           setTimeout(() => bongo.remove(), 600); // Remove from DOM after slide down
         }, 5000);
       }
