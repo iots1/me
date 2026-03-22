@@ -29,6 +29,8 @@
         font-family: "Fira Code", monospace;
         background-color: #0d1117; /* GitHub Dark Dimmed Background */
         color: #c9d1d9;
+        /* Prevent scrollbars during animations */
+        overflow-x: hidden;
       }
 
       /* Custom Scrollbar to match the theme */
@@ -158,13 +160,15 @@
           <div class="w-3.5 h-3.5 rounded-full bg-[#27c93f]"></div>
         </div>
         <div
+          id="terminal-header-text"
           class="text-center text-[#8b949e] text-xs sm:text-sm font-medium tracking-wider whitespace-nowrap px-2"
         >
-          jirayu@backend-node: ~/portfolio
+          <!-- Filled by JS -->
         </div>
         <div class="flex flex-1 justify-end items-center z-20">
           <a
-            href="https://github.com/iots1"
+            id="github-profile-link"
+            href="#"
             target="_blank"
             class="mr-3 text-[#8b949e] hover:text-white transition-colors"
             title="GitHub Profile"
@@ -175,9 +179,10 @@
               ></path>
             </svg>
           </a>
-          <!-- GitHub Star Button (repo=me) -->
+          <!-- GitHub Star Button -->
           <iframe
-            src="https://ghbtns.com/github-btn.html?user=iots1&repo=me&type=star&count=true"
+            id="github-star-iframe"
+            src=""
             frameborder="0"
             scrolling="0"
             width="90"
@@ -226,9 +231,8 @@
             Last login: <span id="current-time"></span> on ttys001
           </div>
           <div>
-            <span class="cmd-prompt">guest@system</span>:<span class="cmd-dir"
-              >~</span
-            >$ <span id="typing-text"></span
+            <span class="cmd-prompt"></span>:<span class="cmd-dir">~</span>$
+            <span id="typing-text"></span
             ><span
               id="initial-cursor"
               class="cursor-blink bg-gray-400 w-2 h-5 inline-block align-middle ml-1"
@@ -245,7 +249,7 @@
         <!-- End Prompt (Interactive) -->
         <div class="pt-4 pb-10 flex items-center" id="cli-input-line">
           <span id="cli-prompt-text"
-            ><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir"
+            ><span class="cmd-prompt"></span>:<span class="cmd-dir"
               >~/portfolio</span
             >$
           </span>
@@ -308,6 +312,65 @@
     </div>
 
     <script>
+      // =======================================================================
+      // --- USER CONFIGURATION (For Open Source Customization) ---
+      // =======================================================================
+      const CONFIG = {
+        // 1. General Profile
+        userName: "Jirayu Mool-ang",
+        userTitle: "Senior Backend Developer",
+        whoamiTitle: "Senior Backend Developer & Software Architect",
+        whoamiDescription:
+          "Experienced Full Stack Developer and DevOps specialist with over 9 years of expertise in designing, developing, and deploying scalable, high-performance web and mobile applications.<br>I specialize in building high-availability architectures (HIS/ERP) that handle massive growth and high-concurrency workloads without compromising data integrity.",
+
+        // 2. Terminal & OS Identity
+        osName: "Jirayu-OS", // OS Name used in Boot screen & Neofetch
+        terminalUser: "jirayu", // Header: [terminalUser]@[terminalHost]
+        terminalHost: "backend-node",
+        promptUser: "guest", // CLI: [promptUser]@[promptMachine]
+        promptMachine: "system",
+
+        // 3. GitHub Info
+        githubUsername: "iots1",
+        githubRepo: "me", // Repository name used for the Star button
+        avatarUrl: "https://github.com/iots1.png", // GitHub Avatar or any image URL
+
+        // 4. Contact & Links
+        email: "jirayu.moolang@gmail.com",
+        location: "Chiang Mai, Thailand",
+        linkedinUrl: "https://www.linkedin.com/in/jirayu-moolang/",
+        blueprintUrl: "https://iots1.github.io/enterprise-backend-blueprint/",
+        resumeUrl:
+          "https://www.canva.com/design/DAEo4YHBhOo/rvu9YVBl4cl3HrEY7U3vJg/view?embed",
+        portfolioUrl:
+          "https://www.canva.com/design/DAGcELaBz6s/XTNrSNzgNL1qGsFt7B4q6A/view?embed",
+      };
+
+      // --- Apply Config to DOM Elements ---
+      function applyConfigToDOM() {
+        // Document Title
+        document.title = `${CONFIG.userName} | ${CONFIG.userTitle}`;
+
+        // Terminal Header
+        document.getElementById("terminal-header-text").innerText =
+          `${CONFIG.terminalUser}@${CONFIG.terminalHost}: ~/portfolio`;
+
+        // GitHub Links & iframe
+        document.getElementById("github-profile-link").href =
+          `https://github.com/${CONFIG.githubUsername}`;
+        document.getElementById("github-star-iframe").src =
+          `https://ghbtns.com/github-btn.html?user=${CONFIG.githubUsername}&repo=${CONFIG.githubRepo}&type=star&count=true`;
+
+        // Set Static Command Prompts
+        const promptElements = document.querySelectorAll(".cmd-prompt");
+        promptElements.forEach((el) => {
+          el.innerText = `${CONFIG.promptUser}@${CONFIG.promptMachine}`;
+        });
+      }
+
+      // Execute configuration immediately
+      applyConfigToDOM();
+
       // Set fake current date/time for Last login line
       document.getElementById("current-time").innerText =
         new Date().toLocaleString("en-US", {
@@ -320,27 +383,25 @@
         });
 
       // --- Refactored Content Templates ---
-      // Store HTML for each command as a function for 100% reusable exact output
       const templates = {
         whoami: () => `
                 <div class="mt-4 pl-4 border-l-2 border-[#30363d]">
-                    <h1 class="text-2xl sm:text-4xl font-bold text-white mb-2">Jirayu Mool-ang</h1>
-                    <h2 class="text-lg sm:text-xl text-[#ff7b72] mb-4">> Senior Backend Developer & Software Architect</h2>
+                    <h1 class="text-2xl sm:text-4xl font-bold text-white mb-2">${CONFIG.userName}</h1>
+                    <h2 class="text-lg sm:text-xl text-[#ff7b72] mb-4">> ${CONFIG.whoamiTitle}</h2>
                     <p class="text-[#c9d1d9] leading-relaxed max-w-3xl">
-                        Experienced Full Stack Developer and DevOps specialist with over 9 years of expertise in designing, developing, and deploying scalable, high-performance web and mobile applications.<br>
-                        I specialize in building high-availability architectures (HIS/ERP) that handle massive growth and high-concurrency workloads without compromising data integrity.
+                        ${CONFIG.whoamiDescription}
                     </p>
                 </div>
             `,
         contact: () => `
                 <div class="mt-2 pl-4 flex flex-col gap-2">
-                    <div><span class="json-key">Location:</span> <span class="json-string">Chiang Mai, Thailand</span></div>
-                    <div><span class="json-key">Email:</span> <a href="mailto:jirayu.moolang@gmail.com" class="json-string link-hover">jirayu.moolang@gmail.com</a></div>
-                    <div><span class="json-key">GitHub:</span> <a href="https://github.com/iots1" target="_blank" class="json-string link-hover">github.com/iots1</a></div>
-                    <div><span class="json-key">LinkedIn:</span> <a href="https://www.linkedin.com/in/jirayu-moolang/" target="_blank" class="json-string link-hover">linkedin.com/in/jirayu-moolang</a></div>
-                    <div><span class="json-key">Engineering Blueprint:</span> <a href="https://iots1.github.io/enterprise-backend-blueprint/" target="_blank" class="json-string link-hover">iots1.github.io/enterprise-backend-blueprint/</a></div>
-                    <div><span class="json-key">Resume:</span> <button onclick="openModal('https://www.canva.com/design/DAEo4YHBhOo/rvu9YVBl4cl3HrEY7U3vJg/view?embed', 'view_resume')" class="json-string link-hover cursor-pointer bg-transparent border-none p-0 text-left font-mono">View Full Resume</button></div>
-                    <div><span class="json-key">Portfolio:</span> <button onclick="openModal('https://www.canva.com/design/DAGcELaBz6s/XTNrSNzgNL1qGsFt7B4q6A/view?embed', 'view_portfolio')" class="json-string link-hover cursor-pointer bg-transparent border-none p-0 text-left font-mono">View Interactive Portfolio</button></div>
+                    <div><span class="json-key">Location:</span> <span class="json-string">${CONFIG.location}</span></div>
+                    <div><span class="json-key">Email:</span> <a href="mailto:${CONFIG.email}" class="json-string link-hover">${CONFIG.email}</a></div>
+                    <div><span class="json-key">GitHub:</span> <a href="https://github.com/${CONFIG.githubUsername}" target="_blank" class="json-string link-hover">github.com/${CONFIG.githubUsername}</a></div>
+                    <div><span class="json-key">LinkedIn:</span> <a href="${CONFIG.linkedinUrl}" target="_blank" class="json-string link-hover">linkedin.com/in/${CONFIG.githubUsername}</a></div>
+                    <div><span class="json-key">Engineering Blueprint:</span> <a href="${CONFIG.blueprintUrl}" target="_blank" class="json-string link-hover">${CONFIG.blueprintUrl.replace("https://", "")}</a></div>
+                    <div><span class="json-key">Resume:</span> <button onclick="openModal('${CONFIG.resumeUrl}', 'view_resume')" class="json-string link-hover cursor-pointer bg-transparent border-none p-0 text-left font-mono">View Full Resume</button></div>
+                    <div><span class="json-key">Portfolio:</span> <button onclick="openModal('${CONFIG.portfolioUrl}', 'view_portfolio')" class="json-string link-hover cursor-pointer bg-transparent border-none p-0 text-left font-mono">View Interactive Portfolio</button></div>
                 </div>
             `,
         skills: () => `
@@ -431,12 +492,12 @@
         archive: () => `
                 <div class="mt-2 pl-4 font-mono text-xs sm:text-sm text-[#c9d1d9]">
                     <div class="text-[#8b949e]">total 42</div>
-                    <div>drwxr-xr-x  2 jirayu dev  4096 Mar 22 11:00 <span class="text-[#79c0ff]">.</span></div>
-                    <div>drwxr-xr-x 10 jirayu dev  4096 Mar 22 11:00 <span class="text-[#79c0ff]">..</span></div>
+                    <div>drwxr-xr-x  2 ${CONFIG.promptUser} dev  4096 Mar 22 11:00 <span class="text-[#79c0ff]">.</span></div>
+                    <div>drwxr-xr-x 10 ${CONFIG.promptUser} dev  4096 Mar 22 11:00 <span class="text-[#79c0ff]">..</span></div>
                     <div class="text-[#8b949e] italic mt-2"># Highlighted projects from University / College era:</div>
-                    <div>-rw-r--r--  1 jirayu dev 14231 Mar 22 11:00 <span class="text-white">face_recognition_opencv.py</span></div>
-                    <div>-rw-r--r--  1 jirayu dev  8192 Mar 22 11:00 <span class="text-white">industrial_robot_arm_2011.cpp</span></div>
-                    <div>-rw-r--r--  1 jirayu dev  4096 Mar 22 11:00 <span class="text-white">abu_robot_rescue_2012.c</span></div>
+                    <div>-rw-r--r--  1 ${CONFIG.promptUser} dev 14231 Mar 22 11:00 <span class="text-white">face_recognition_opencv.py</span></div>
+                    <div>-rw-r--r--  1 ${CONFIG.promptUser} dev  8192 Mar 22 11:00 <span class="text-white">industrial_robot_arm_2011.cpp</span></div>
+                    <div>-rw-r--r--  1 ${CONFIG.promptUser} dev  4096 Mar 22 11:00 <span class="text-white">abu_robot_rescue_2012.c</span></div>
                 </div>
             `,
       };
@@ -446,27 +507,27 @@
         return `
                 <div class="space-y-8">
                     <div>
-                        <div><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">whoami</span></div>
+                        <div><span class="cmd-prompt">${CONFIG.promptUser}@${CONFIG.promptMachine}</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">whoami</span></div>
                         ${templates.whoami()}
                     </div>
                     <div>
-                        <div><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">cat contact.txt</span></div>
+                        <div><span class="cmd-prompt">${CONFIG.promptUser}@${CONFIG.promptMachine}</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">cat contact.txt</span></div>
                         ${templates.contact()}
                     </div>
                     <div>
-                        <div><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">cat skills.json</span></div>
+                        <div><span class="cmd-prompt">${CONFIG.promptUser}@${CONFIG.promptMachine}</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">cat skills.json</span></div>
                         ${templates.skills()}
                     </div>
                     <div>
-                        <div><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">./show_experience.sh --latest-first</span></div>
+                        <div><span class="cmd-prompt">${CONFIG.promptUser}@${CONFIG.promptMachine}</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">./show_experience.sh --latest-first</span></div>
                         ${templates.experience()}
                     </div>
                     <div>
-                        <div><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">tail -n 5 education.log</span></div>
+                        <div><span class="cmd-prompt">${CONFIG.promptUser}@${CONFIG.promptMachine}</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">tail -n 5 education.log</span></div>
                         ${templates.education()}
                     </div>
                     <div>
-                        <div><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">ls -la ./academic_archive/</span></div>
+                        <div><span class="cmd-prompt">${CONFIG.promptUser}@${CONFIG.promptMachine}</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">ls -la ./academic_archive/</span></div>
                         ${templates.archive()}
                     </div>
                 </div>
@@ -496,7 +557,7 @@
         "Mounting /portfolio/academic_archive...",
         "Starting User Environment...",
         "Starting Graphical Interface...",
-        "Welcome to JIRAYU-OS.",
+        `Welcome to ${CONFIG.osName.toUpperCase()}.`,
       ];
 
       function simulateBootProcess() {
@@ -798,7 +859,7 @@
               // If waiting for y/n, don't show the full prompt prefix
               echoDiv.innerHTML = `<div><span class="text-[#f2cc60]">(y/n): </span><span class="cmd-input">${command}</span></div>`;
             } else {
-              echoDiv.innerHTML = `<div><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">${command}</span></div>`;
+              echoDiv.innerHTML = `<div><span class="cmd-prompt">${CONFIG.promptUser}@${CONFIG.promptMachine}</span>:<span class="cmd-dir">~/portfolio</span>$ <span class="cmd-input">${command}</span></div>`;
             }
             cliOutputContainer.appendChild(echoDiv);
 
@@ -820,7 +881,7 @@
               // Reset prompt to normal
               awaitingConfirmation = null;
               document.getElementById("cli-prompt-text").innerHTML =
-                `<span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ `;
+                `<span class="cmd-prompt">${CONFIG.promptUser}@${CONFIG.promptMachine}</span>:<span class="cmd-dir">~/portfolio</span>$ `;
             } else {
               // Process normal command
               processCommand(command);
@@ -831,7 +892,7 @@
             if (awaitingConfirmation) {
               echoDiv.innerHTML = `<div><span class="text-[#f2cc60]">(y/n): </span></div>`;
             } else {
-              echoDiv.innerHTML = `<div><span class="cmd-prompt">guest@system</span>:<span class="cmd-dir">~/portfolio</span>$ </div>`;
+              echoDiv.innerHTML = `<div><span class="cmd-prompt">${CONFIG.promptUser}@${CONFIG.promptMachine}</span>:<span class="cmd-dir">~/portfolio</span>$ </div>`;
             }
             cliOutputContainer.appendChild(echoDiv);
           }
@@ -858,23 +919,151 @@
         }
       });
 
-      // Handle commands using refactored functions
+      // --- Helper Functions for Complex Templates and Easter Eggs ---
+      function getCowsayTemplate(msg) {
+        const dashLine = "-".repeat(msg.length + 2);
+        return `
+<pre class="font-mono text-xs sm:text-sm leading-tight">
+  ${dashLine}
+&lt; ${msg} &gt;
+  ${dashLine}
+         \\  ^__^
+          \\ (oo)\\_______
+            (__)\\       )\\/\\
+                ||----w |
+                ||     ||
+</pre>`;
+      }
+
+      function getNeofetchTemplate() {
+        return `
+            <div class="flex flex-col sm:flex-row gap-6 items-start text-xs sm:text-sm font-mono">
+                <div class="w-32 h-32 sm:w-48 sm:h-48 shrink-0 relative mt-2">
+                    <img src="${CONFIG.avatarUrl}" alt="Avatar" class="w-full h-full object-cover rounded-md border border-[#30363d] shadow-[0_0_20px_rgba(121,192,255,0.15)]" />
+                </div>
+                <div>
+                   <div class="text-[#79c0ff] font-bold">${CONFIG.promptUser}@${CONFIG.osName.toLowerCase()}</div>
+                   <div class="text-[#c9d1d9]">-----------------</div>
+                   <div><span class="text-[#79c0ff] font-bold">OS</span>: ${CONFIG.osName} (Backend Edition) x86_64</div>
+                   <div><span class="text-[#79c0ff] font-bold">Host</span>: Senior Developer Matrix</div>
+                   <div><span class="text-[#79c0ff] font-bold">Kernel</span>: 9.0.0-years-experience</div>
+                   <div><span class="text-[#79c0ff] font-bold">Uptime</span>: 24/7 (Powered by Coffee ☕)</div>
+                   <div><span class="text-[#79c0ff] font-bold">Packages</span>: 420 (npm, go, apt, composer)</div>
+                   <div><span class="text-[#79c0ff] font-bold">Shell</span>: zsh 5.8</div>
+                   <div><span class="text-[#79c0ff] font-bold">Resolution</span>: Responsive px</div>
+                   <div><span class="text-[#79c0ff] font-bold">DE</span>: CLI / HTML5</div>
+                   <div><span class="text-[#79c0ff] font-bold">WM</span>: Terminal Window Manager</div>
+                   <div><span class="text-[#79c0ff] font-bold">Theme</span>: GitHub Dark Dimmed [GTK2/3]</div>
+                   <div><span class="text-[#79c0ff] font-bold">Terminal</span>: Web-TTY</div>
+                   <div><span class="text-[#79c0ff] font-bold">CPU</span>: Brain (2 Cores, Logical & Creative)</div>
+                   <div><span class="text-[#79c0ff] font-bold">Memory</span>: 64000MiB (Forgetful sometimes)</div>
+                   <div class="mt-2 flex gap-1">
+                      <div class="w-4 h-4 bg-[#0d1117]"></div><div class="w-4 h-4 bg-[#ff7b72]"></div><div class="w-4 h-4 bg-[#3fb950]"></div><div class="w-4 h-4 bg-[#d29922]"></div><div class="w-4 h-4 bg-[#58a6ff]"></div><div class="w-4 h-4 bg-[#bc8cff]"></div><div class="w-4 h-4 bg-[#39c5cf]"></div><div class="w-4 h-4 bg-[#b1bac4]"></div>
+                   </div>
+                </div>
+            </div>`;
+      }
+
+      function triggerJurassicParkTrap(outputDiv) {
+        outputDiv.className = "mt-2 mb-4 pl-4 text-[#ff7b72]";
+        outputDiv.innerHTML = `
+              <div>rm: it is dangerous to operate recursively on '/'</div>
+              <div>rm: use --no-preserve-root to override this failsafe</div>
+              <div class="mt-2 font-bold animate-pulse text-white">NICE TRY, HACKER! 😉</div>
+          `;
+        cliOutputContainer.appendChild(outputDiv);
+
+        // Trigger 3D Warning Pop-up (Jurassic Park Meme)
+        let warningPop = document.getElementById("hacker-warning-popup");
+        if (!warningPop) {
+          warningPop = document.createElement("div");
+          warningPop.id = "hacker-warning-popup";
+          warningPop.style.position = "fixed";
+          warningPop.style.top = "50%";
+          warningPop.style.left = "50%";
+          warningPop.style.transform =
+            "translate(-50%, -50%) scale(0) rotateX(90deg)"; // 3D effect initial state
+          warningPop.style.zIndex = "10000";
+          warningPop.style.transition =
+            "transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+          warningPop.style.textAlign = "center";
+          warningPop.style.perspective = "1000px"; // Add depth perspective
+
+          warningPop.innerHTML = `
+                <img src="https://media.giphy.com/media/5ftsmLIqktHQA/giphy.gif" alt="Ah ah ah" style="border-radius: 10px; border: 4px solid #ff7b72; box-shadow: 0 20px 50px rgba(255, 123, 114, 0.6); max-width: 300px; transform: rotateY(-10deg) rotateX(5deg);">
+                <div style="background: #ff7b72; color: #0d1117; font-weight: bold; font-size: 1.2rem; padding: 8px 16px; border-radius: 8px; margin-top: -20px; position: relative; display: inline-block; transform: rotate(-5deg) translateZ(50px); box-shadow: 0 5px 15px rgba(0,0,0,0.5);">ACCESS DENIED</div>
+            `;
+          document.body.appendChild(warningPop);
+        }
+
+        // Animate In with 3D pop effect
+        setTimeout(() => {
+          warningPop.style.transform =
+            "translate(-50%, -50%) scale(1) rotateX(0deg)";
+        }, 50);
+
+        // Hide after 4 seconds
+        setTimeout(() => {
+          warningPop.style.transform =
+            "translate(-50%, -50%) scale(0) rotateX(-90deg)";
+          setTimeout(() => warningPop.remove(), 600);
+        }, 4000);
+      }
+
+      function triggerBongoCat(outputDiv) {
+        outputDiv.className = "mt-2 mb-4 pl-4 text-[#7ee787]";
+        outputDiv.innerHTML = `Summoning Hacker Cat... 🐱💻`;
+        cliOutputContainer.appendChild(outputDiv);
+
+        let bongo = document.getElementById("hacker-cat-popup");
+        if (!bongo) {
+          bongo = document.createElement("img");
+          bongo.id = "hacker-cat-popup";
+          // Using a reliable classic typing cat GIF from giphy
+          bongo.src = "https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif";
+          bongo.style.position = "fixed";
+          bongo.style.bottom = "-300px";
+          bongo.style.right = "50px";
+          bongo.style.width = "250px";
+          bongo.style.borderRadius = "50%"; // Make it look a bit rounded like a 3D bubble
+          bongo.style.boxShadow = "0 0 30px rgba(126, 231, 135, 0.6)";
+          bongo.style.zIndex = "9999";
+          // Bouncy spring transition
+          bongo.style.transition =
+            "bottom 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+          document.body.appendChild(bongo);
+        }
+
+        // Slide up animation
+        setTimeout(() => (bongo.style.bottom = "20px"), 100);
+
+        // Hide after 5 seconds
+        setTimeout(() => {
+          bongo.style.bottom = "-300px";
+          setTimeout(() => bongo.remove(), 600); // Remove from DOM after slide down
+        }, 5000);
+      }
+
+      // --- Process Command Main Logic (Refactored using Switch Case) ---
       function processCommand(cmd) {
         const outputDiv = document.createElement("div");
         outputDiv.className = "mt-2 mb-4 pl-4 text-[#c9d1d9]";
 
         const lowerCmd = cmd.toLowerCase().trim();
 
-        if (lowerCmd === "clear") {
-          // Clear all output and hide boot sequence
-          cliOutputContainer.innerHTML = "";
-          if (bootSequence) bootSequence.style.display = "none";
-          return;
-        } else if (lowerCmd === "help") {
-          outputDiv.innerHTML = `
+        // Use switch-case for better readability and structure
+        switch (lowerCmd) {
+          case "clear":
+            cliOutputContainer.innerHTML = "";
+            if (bootSequence) bootSequence.style.display = "none";
+            return; // Return early, don't append empty div
+
+          case "help":
+            outputDiv.innerHTML = `
                     <div>Available commands:</div>
                     <ul class="list-disc list-inside mt-1 ml-2 text-[#8b949e]">
                         <li><span class="text-[#79c0ff]">whoami</span> - Display profile information</li>
+                        <li><span class="text-[#79c0ff]">ls</span> - List directory contents</li>
                         <li><span class="text-[#79c0ff]">cat contact.txt</span> - Show contact details</li>
                         <li><span class="text-[#79c0ff]">cat skills.json</span> - List technical skills</li>
                         <li><span class="text-[#79c0ff]">./show_experience.sh</span> - Show work experience</li>
@@ -882,76 +1071,152 @@
                         <li><span class="text-[#79c0ff]">ls -la ./academic_archive/</span> - Show university projects</li>
                         <li><span class="text-[#79c0ff]">./deploy_profile.sh</span> - Display entire profile</li>
                         <li><span class="text-[#79c0ff]">clear</span> - Clear terminal output</li>
+                        <li><span class="text-[#79c0ff]">history</span> - Show command history</li>
+                        <li><span class="text-[#79c0ff]">neofetch</span> - Show system information</li>
+                        <li><span class="text-[#79c0ff]">cowsay [text]</span> - Have an ASCII cow say something</li>
+                        <li><span class="text-[#79c0ff]">bongo</span> - ??? 🐱</li>
                         <li><span class="text-[#79c0ff]">exit</span> - Restart terminal session</li>
                         <li><span class="text-[#79c0ff]">matrix</span> - ???</li>
                     </ul>
                 `;
-        } else if (lowerCmd === "whoami") {
-          outputDiv.className = "mb-4"; // Remove padding for this specific block to match layout
-          outputDiv.innerHTML = templates.whoami();
-        } else if (lowerCmd === "cat contact.txt" || lowerCmd === "contact") {
-          outputDiv.className = "mb-4";
-          outputDiv.innerHTML = templates.contact();
-        } else if (lowerCmd === "cat skills.json" || lowerCmd === "skills") {
-          outputDiv.className = "mb-4";
-          outputDiv.innerHTML = templates.skills();
-        } else if (
-          lowerCmd === "./show_experience.sh" ||
-          lowerCmd === "./show_experience.sh --latest-first" ||
-          lowerCmd === "experience"
-        ) {
-          outputDiv.className = "mb-4";
-          outputDiv.innerHTML = templates.experience();
-        } else if (
-          lowerCmd === "tail -n 5 education.log" ||
-          lowerCmd === "education"
-        ) {
-          outputDiv.className = "mb-4";
-          outputDiv.innerHTML = templates.education();
-        } else if (
-          lowerCmd === "ls -la ./academic_archive/" ||
-          lowerCmd === "ls -la ./academic_archive" ||
-          lowerCmd === "archive"
-        ) {
-          outputDiv.className = "mb-4";
-          outputDiv.innerHTML = templates.archive();
-        } else if (lowerCmd === "./deploy_profile.sh") {
-          // Instead of outputting data, switch to y/n prompt mode
-          outputDiv.className = "mt-2 mb-2 pl-4 text-[#f2cc60]";
-          outputDiv.innerHTML = `> Warning: This command will display the entire profile content. Proceed?`;
-          cliOutputContainer.appendChild(outputDiv);
+            break;
 
-          awaitingConfirmation = "deploy_profile";
-          document.getElementById("cli-prompt-text").innerHTML =
-            `<span class="text-[#f2cc60]">(y/n): </span>`;
-          return; // Return early to stop execution and prevent empty outputDiv from appending
-        } else if (
-          lowerCmd === "sudo rm -rf /" ||
-          lowerCmd === "sudo rm -rf *"
-        ) {
-          outputDiv.className = "mt-2 mb-4 pl-4 text-[#ff7b72]";
-          outputDiv.innerHTML = `
-                    <div>rm: it is dangerous to operate recursively on '/'</div>
-                    <div>rm: use --no-preserve-root to override this failsafe</div>
-                    <div class="mt-2 font-bold animate-pulse text-white">NICE TRY, HACKER! 😉</div>
-                `;
-        } else if (lowerCmd === "matrix") {
-          outputDiv.className = "mt-2 mb-4 pl-4 text-[#7ee787]";
-          outputDiv.innerHTML = `Initiating Matrix protocol... (Click anywhere or press any key to stop)`;
-          startMatrix();
-        } else if (lowerCmd === "exit") {
-          outputDiv.innerHTML = `Logging out... Restarting session...`;
-          cliOutputContainer.appendChild(outputDiv);
+          case "whoami":
+            outputDiv.className = "mb-4";
+            outputDiv.innerHTML = templates.whoami();
+            break;
 
-          setTimeout(() => {
-            window.location.reload();
-          }, 800);
-          return;
-        } else {
-          outputDiv.innerHTML = `bash: ${cmd}: command not found. Type 'help' for available commands.`;
+          case "ls":
+            outputDiv.className = "mb-4 pl-4";
+            outputDiv.innerHTML = `<div class="flex gap-4 flex-wrap text-[#c9d1d9]"><span class="text-[#79c0ff]">academic_archive/</span> <span>contact.txt</span> <span>education.log</span> <span>skills.json</span> <span class="text-[#7ee787]">show_experience.sh</span> <span class="text-[#7ee787]">deploy_profile.sh</span> <span class="text-[#8b949e]">.env</span></div>`;
+            break;
+
+          case "cat .env":
+            outputDiv.className = "mt-2 mb-4 pl-4 text-[#ffbd2e]";
+            outputDiv.innerHTML = `Access Denied. Nice try! As a Senior Backend Dev, my secrets are securely managed and injected via CI/CD. No plaintext passwords here! 😎🔒`;
+            break;
+
+          case "cat contact.txt":
+          case "contact":
+            outputDiv.className = "mb-4";
+            outputDiv.innerHTML = templates.contact();
+            break;
+
+          case "cat skills.json":
+          case "skills":
+            outputDiv.className = "mb-4";
+            outputDiv.innerHTML = templates.skills();
+            break;
+
+          case "./show_experience.sh":
+          case "./show_experience.sh --latest-first":
+          case "experience":
+            outputDiv.className = "mb-4";
+            outputDiv.innerHTML = templates.experience();
+            break;
+
+          case "tail -n 5 education.log":
+          case "education":
+            outputDiv.className = "mb-4";
+            outputDiv.innerHTML = templates.education();
+            break;
+
+          case "ls -la ./academic_archive/":
+          case "ls -la ./academic_archive":
+          case "archive":
+            outputDiv.className = "mb-4";
+            outputDiv.innerHTML = templates.archive();
+            break;
+
+          case "./deploy_profile.sh":
+            outputDiv.className = "mt-2 mb-2 pl-4 text-[#f2cc60]";
+            outputDiv.innerHTML = `> Warning: This command will display the entire profile content. Proceed?`;
+            cliOutputContainer.appendChild(outputDiv);
+
+            awaitingConfirmation = "deploy_profile";
+            document.getElementById("cli-prompt-text").innerHTML =
+              `<span class="text-[#f2cc60]">(y/n): </span>`;
+            return;
+
+          case "sudo rm -rf /":
+          case "sudo rm -rf *":
+          case "rm -rf /":
+          case "rm -rf *":
+            triggerJurassicParkTrap(outputDiv);
+            return;
+
+          case "bongo":
+            triggerBongoCat(outputDiv);
+            return;
+
+          case "matrix":
+            outputDiv.className = "mt-2 mb-4 pl-4 text-[#7ee787]";
+            outputDiv.innerHTML = `Initiating Matrix protocol... (Click anywhere or press any key to stop)`;
+            startMatrix();
+            break;
+
+          case "pwd":
+            outputDiv.innerHTML = `/home/${CONFIG.promptUser}/portfolio`;
+            break;
+
+          case "date":
+            outputDiv.innerHTML = new Date().toString();
+            break;
+
+          case "history":
+            outputDiv.className =
+              "mt-2 mb-4 pl-4 text-[#8b949e] font-mono text-sm";
+            outputDiv.innerHTML = commandHistory
+              .map(
+                (c, i) =>
+                  `<div><span class="text-[#c9d1d9] inline-block w-8 text-right mr-4">${i + 1}</span>${c}</div>`,
+              )
+              .join("");
+            break;
+
+          case "neofetch":
+          case "fastfetch":
+            outputDiv.className = "mt-4 mb-6 pl-4";
+            outputDiv.innerHTML = getNeofetchTemplate();
+            break;
+
+          case "reboot":
+          case "shutdown":
+            outputDiv.className = "mt-2 mb-4 pl-4 text-[#f2cc60]";
+            outputDiv.innerHTML = `System going down for ${lowerCmd} NOW!`;
+            cliOutputContainer.appendChild(outputDiv);
+            setTimeout(() => window.location.reload(), 1000);
+            return;
+
+          case "exit":
+            outputDiv.innerHTML = `Logging out... Restarting session...`;
+            cliOutputContainer.appendChild(outputDiv);
+            setTimeout(() => window.location.reload(), 800);
+            return;
+
+          // Handle commands with prefixes (like 'sudo ...' or 'cowsay ...')
+          default:
+            if (lowerCmd.startsWith("sudo")) {
+              outputDiv.className = "mt-2 mb-4 pl-4 text-[#ff7b72]";
+              outputDiv.innerHTML = `${CONFIG.promptUser} is not in the sudoers file. This incident will be reported. 🚨`;
+            } else if (lowerCmd.startsWith("cd")) {
+              outputDiv.className = "mt-2 mb-4 pl-4 text-[#ff7b72]";
+              outputDiv.innerHTML = `bash: cd: Permission denied. You are trapped in my portfolio! 🚪🔒`;
+            } else if (lowerCmd.startsWith("cowsay")) {
+              let msg = cmd.substring(6).trim();
+              if (!msg) msg = "Moo! Welcome to my portfolio!";
+              outputDiv.className = "mt-2 mb-4 pl-4 text-[#c9d1d9]";
+              outputDiv.innerHTML = getCowsayTemplate(msg);
+            } else {
+              outputDiv.innerHTML = `bash: ${cmd}: command not found. Type 'help' for available commands.`;
+            }
+            break;
         }
 
-        cliOutputContainer.appendChild(outputDiv);
+        // Append the output div if it has content
+        if (outputDiv.innerHTML !== "") {
+          cliOutputContainer.appendChild(outputDiv);
+        }
       }
 
       // --- Matrix Digital Rain ---
