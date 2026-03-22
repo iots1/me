@@ -21,15 +21,15 @@ const CONFIG = {
   whoamiDescription: "...",
 
   // 2. Terminal & OS Identity
-  osName: "Jirayu-OS",        // Shown in boot screen & neofetch
-  terminalUser: "jirayu",     // Header: [terminalUser]@[terminalHost]
+  osName: "Jirayu-OS", // Shown in boot screen & neofetch
+  terminalUser: "jirayu", // Header: [terminalUser]@[terminalHost]
   terminalHost: "backend-node",
-  promptUser: "guest",        // CLI prompt: [promptUser]@[promptMachine]
+  promptUser: "guest", // CLI prompt: [promptUser]@[promptMachine]
   promptMachine: "system",
 
   // 3. GitHub Info
   githubUsername: "iots1",
-  githubRepo: "me",           // Used for the ⭐ Star button in the header
+  githubRepo: "me", // Used for the ⭐ Star button in the header
   avatarUrl: "https://github.com/iots1.png",
 
   // 4. Contact & Links
@@ -37,12 +37,13 @@ const CONFIG = {
   location: "...",
   linkedinUrl: "...",
   blueprintUrl: "...",
-  resumeUrl: "...",           // Canva embed link for Resume overlay
-  portfolioUrl: "...",        // Canva embed link for Portfolio overlay
+  resumeUrl: "...", // Canva embed link for Resume overlay
+  portfolioUrl: "...", // Canva embed link for Portfolio overlay
 };
 ```
 
 After editing `CONFIG`, the values are automatically applied to:
+
 - `document.title` and the terminal header text
 - GitHub profile link and ⭐ Star button iframe (`src`)
 - All `guest@system` CLI prompt labels throughout the page
@@ -52,11 +53,17 @@ After editing `CONFIG`, the values are automatically applied to:
 Update the `<meta>` tags in `<head>` to control how the link appears when shared on LINE, Twitter, Facebook, etc.:
 
 ```html
-<meta property="og:title"       content="Jirayu Mool-ang | Senior Backend Developer" />
-<meta property="og:description" content="Interactive Terminal-Style Developer Portfolio" />
-<meta property="og:image"       content="https://iots1.github.io/me/thumbnail.png" />
-<meta property="og:url"         content="https://iots1.github.io/me/" />
-<meta property="og:type"        content="website" />
+<meta
+  property="og:title"
+  content="Jirayu Mool-ang | Senior Backend Developer"
+/>
+<meta
+  property="og:description"
+  content="Interactive Terminal-Style Developer Portfolio"
+/>
+<meta property="og:image" content="https://iots1.github.io/me/thumbnail.png" />
+<meta property="og:url" content="https://iots1.github.io/me/" />
+<meta property="og:type" content="website" />
 ```
 
 > **Tip:** Replace `thumbnail.png` with your own image (recommended size: **1200×630 px**). The thumbnail generator script (`generate_thumbnail.js`) can be used to automate this.
@@ -72,7 +79,7 @@ Update the `<meta>` tags in `<head>` to control how the link appears when shared
 | **Draggable Window**               | Click and drag the header bar (near the red/yellow/green dots) to reposition the terminal window                                |
 | **Boot Sequence Effect**           | Simulates a startup script with loading animations and ASCII Art logo on first load — press `Space` to pause or `Enter` to skip |
 | **Built-in Presentation (Iframe)** | Opens a Resume or Portfolio (Canva) in a full-screen overlay directly on the page — press `Ctrl+X` or `Esc` to close            |
-| **GitHub Star Button**             | Live ⭐ Star button and profile link shown in the terminal header — driven by `CONFIG.githubUsername` and `CONFIG.githubRepo`    |
+| **GitHub Star Button**             | Live ⭐ Star button and profile link shown in the terminal header — driven by `CONFIG.githubUsername` and `CONFIG.githubRepo`   |
 | **Open Graph Thumbnail**           | Proper `og:image` meta tag so the site previews correctly when shared on LINE, Twitter, Facebook, etc.                          |
 | **Easter Eggs 🥚**                 | Hidden hacker-style surprises — try typing secret commands to discover them!                                                    |
 
@@ -92,37 +99,40 @@ Type any of these commands in the terminal input:
 
 ### Core Commands
 
-| Command                               | Shorthand     | Description                                              |
-| ------------------------------------- | ------------- | -------------------------------------------------------- |
-| `help`                                | —             | List all available commands                              |
-| `whoami`                              | —             | Display a brief introduction and current role            |
-| `ls`                                  | —             | List files in the current portfolio directory            |
-| `cat contact.txt`                     | `contact`     | Show contact information (Email, LinkedIn, GitHub)       |
-| `cat skills.json`                     | `skills`      | Display tech stack and skills in JSON format             |
-| `./show_experience.sh`                | `experience`  | Show work history, sorted by most recent                 |
-| `./show_experience.sh --latest-first` | —             | Same as above (explicit flag)                            |
-| `tail -n 5 education.log`             | `education`   | Display education history                                |
-| `ls -la ./academic_archive/`          | `archive`     | List academic projects with links to source files        |
-| `./deploy_profile.sh`                 | —             | Display full profile (prompts `y/n` confirmation first)  |
-| `clear`                               | —             | Clear the terminal screen                                |
-| `history`                             | —             | Show previously entered commands with index numbers      |
-| `pwd`                                 | —             | Print current working directory path                     |
-| `date`                                | —             | Print current date and time                              |
-| `neofetch`                            | `fastfetch`   | Show system/OS info in neofetch style                    |
-| `cowsay [text]`                       | —             | Have an ASCII cow say something (default: welcome msg)   |
-| `reboot`                              | `shutdown`    | Trigger a simulated shutdown and reload the page         |
-| `exit`                                | —             | Simulate logout and reload the page                      |
+| Command                               | Shorthand    | Description                                             |
+| ------------------------------------- | ------------ | ------------------------------------------------------- |
+| `help`                                | —            | List all available commands                             |
+| `whoami`                              | —            | Display a brief introduction and current role           |
+| `ls`                                  | —            | List files in the current portfolio directory           |
+| `cat contact.txt`                     | `contact`    | Show contact information (Email, LinkedIn, GitHub)      |
+| `cat skills.json`                     | `skills`     | Display tech stack and skills in JSON format            |
+| `./show_experience.sh`                | `experience` | Show work history, sorted by most recent                |
+| `./show_experience.sh --latest-first` | —            | Same as above (explicit flag)                           |
+| `tail -n 5 education.log`             | `education`  | Display education history                               |
+| `ls -la ./academic_archive/`          | `archive`    | List academic projects with links to source files       |
+| `./deploy_profile.sh`                 | —            | Display full profile (prompts `y/n` confirmation first) |
+| `clear`                               | —            | Clear the terminal screen                               |
+| `history`                             | —            | Show previously entered commands with index numbers     |
+| `pwd`                                 | —            | Print current working directory path                    |
+| `date`                                | —            | Print current date and time                             |
+| `neofetch`                            | `fastfetch`  | Show system/OS info in neofetch style                   |
+| `cowsay [text]`                       | —            | Have an ASCII cow say something (default: welcome msg)  |
+| `reboot`                              | `shutdown`   | Trigger a simulated shutdown and reload the page        |
+| `exit`                                | —            | Simulate logout and reload the page                     |
 
-### Easter Eggs 🥚
+<details>
+<summary>🥚 Easter Eggs <em>(click to reveal)</em></summary>
 
-| Command         | What happens                                                              |
-| --------------- | ------------------------------------------------------------------------- |
-| `matrix`        | Transforms the page into a Matrix-style digital rain (click/key to stop)  |
-| `bongo`         | Summons the Bongo Cat 🐱                                                  |
-| `cat .env`      | Gets denied — secrets are in CI/CD, not plaintext 😎🔒                   |
-| `sudo rm -rf /` | Triggers the Jurassic Park trap 🦕 (also: `sudo rm -rf *`, `rm -rf /`)   |
-| `sudo [any]`    | "You are not in the sudoers file. This incident will be reported. 🚨"     |
-| `cd [any]`      | "Permission denied. You are trapped in my portfolio! 🚪🔒"               |
+| Command         | What happens                                                                                                                                     |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `matrix`        | Transforms the page into a Matrix-style digital rain (click/key to stop)                                                                         |
+| `bongo`         | Summons the Bongo Cat 🐱                                                                                                                         |
+| `cat .env`      | Spawns an infiltration cat 🐈 that sneaks toward the `.env` vault, gets firewall-blocked, panics 🙀, and runs away — then prints "Access Denied" |
+| `sudo rm -rf /` | Triggers the Jurassic Park trap 🦕 (also: `sudo rm -rf *`, `rm -rf /`)                                                                           |
+| `sudo [any]`    | "You are not in the sudoers file. This incident will be reported. 🚨"                                                                            |
+| `cd [any]`      | "Permission denied. You are trapped in my portfolio! 🚪🔒"                                                                                       |
+
+</details>
 
 ---
 
