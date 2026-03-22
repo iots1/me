@@ -2,20 +2,22 @@
 
 > A geeky, interactive Command Line Interface (CLI) style portfolio designed for Backend Developers and Software Architects.
 
+**🌐 Live Website:** [https://iots1.github.io/me/](https://iots1.github.io/me/)
+
 A portfolio that runs in the web browser, simulating a Linux/Mac terminal environment — built as a **single static HTML file**. Present your work history, skills, and projects with style. Perfect for Geeks, DevOps engineers, and Backend Developers.
 
 ---
 
 ## ✨ Features
 
-| Feature | Description |
-|---|---|
-| **Interactive CLI** | A real input field where you can type and execute commands, just like a terminal |
-| **Command History** | Press ⬆️ / ⬇️ arrow keys to cycle through previously entered commands |
-| **Draggable Window** | Click and drag the header bar (near the red/yellow/green dots) to reposition the terminal window |
-| **Boot Sequence Effect** | Simulates a startup script with loading animations and ASCII Art logo on first load — press `Space` to pause or `Enter` to skip |
-| **Built-in Presentation (Iframe)** | Opens a Resume or Portfolio (Canva) in a full-screen overlay directly on the page — press `Ctrl+X` or `Esc` to close |
-| **Easter Eggs 🥚** | Hidden hacker-style surprises — try typing secret commands to discover them! |
+| Feature                            | Description                                                                                                                     |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Interactive CLI**                | A real input field where you can type and execute commands, just like a terminal                                                |
+| **Command History**                | Press ⬆️ / ⬇️ arrow keys to cycle through previously entered commands                                                           |
+| **Draggable Window**               | Click and drag the header bar (near the red/yellow/green dots) to reposition the terminal window                                |
+| **Boot Sequence Effect**           | Simulates a startup script with loading animations and ASCII Art logo on first load — press `Space` to pause or `Enter` to skip |
+| **Built-in Presentation (Iframe)** | Opens a Resume or Portfolio (Canva) in a full-screen overlay directly on the page — press `Ctrl+X` or `Esc` to close            |
+| **Easter Eggs 🥚**                 | Hidden hacker-style surprises — try typing secret commands to discover them!                                                    |
 
 ---
 
@@ -31,20 +33,20 @@ A portfolio that runs in the web browser, simulating a Linux/Mac terminal enviro
 
 Type any of these commands in the terminal input:
 
-| Command | Description |
-|---|---|
-| `help` | List all available commands |
-| `whoami` | Display a brief introduction and current role |
-| `cat contact.txt` | Show contact information (Email, LinkedIn, GitHub) |
-| `cat skills.json` | Display tech stack and skills in JSON format |
-| `./show_experience.sh` | Show work history, sorted by most recent |
-| `tail -n 5 education.log` | Display education history |
-| `ls -la ./academic_archive/` | List academic projects with links to source files |
-| `./deploy_profile.sh` | Display full profile information in one go |
-| `clear` | Clear the terminal screen |
-| `exit` | Simulate logout and reload the page |
-| `matrix` | 🥚 *[Secret]* Transform the page into a Matrix-style digital rain |
-| `sudo rm -rf /` | 🥚 *[Secret]* Try it and find out... |
+| Command                      | Description                                                       |
+| ---------------------------- | ----------------------------------------------------------------- |
+| `help`                       | List all available commands                                       |
+| `whoami`                     | Display a brief introduction and current role                     |
+| `cat contact.txt`            | Show contact information (Email, LinkedIn, GitHub)                |
+| `cat skills.json`            | Display tech stack and skills in JSON format                      |
+| `./show_experience.sh`       | Show work history, sorted by most recent                          |
+| `tail -n 5 education.log`    | Display education history                                         |
+| `ls -la ./academic_archive/` | List academic projects with links to source files                 |
+| `./deploy_profile.sh`        | Display full profile information in one go                        |
+| `clear`                      | Clear the terminal screen                                         |
+| `exit`                       | Simulate logout and reload the page                               |
+| `matrix`                     | 🥚 _[Secret]_ Transform the page into a Matrix-style digital rain |
+| `sudo rm -rf /`              | 🥚 _[Secret]_ Try it and find out...                              |
 
 ---
 
